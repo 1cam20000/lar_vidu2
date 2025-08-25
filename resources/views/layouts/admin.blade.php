@@ -30,6 +30,9 @@
           <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
              href="{{ route('admin.products.index') }}">Products</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.orders.index') }}">Đơn hàng</a>
+        </li>
       </ul>
 
       <ul class="navbar-nav ms-auto">

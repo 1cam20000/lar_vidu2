@@ -16,10 +16,13 @@
     <div class="collapse navbar-collapse" id="navbarUser">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{{ route('user.products.index') }}">Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('user.categories.index') }}">Danh mục</a></li>
+        {{-- <li class="nav-item"><a class="nav-link" href="{{ route('user.categories.index') }}">Danh mục</a></li> --}}
         @auth
           <li class="nav-item"><a class="nav-link" href="{{ route('user.cart.index') }}">Giỏ hàng</a></li>
         @endauth
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('user.orders.index') }}">Lịch sử đơn hàng</a>
+        </li>
       </ul>
       <ul class="navbar-nav ms-auto">
         @auth
