@@ -8,9 +8,8 @@ class Category extends Model
 {
     protected $fillable = ['name', 'description'];
 
-    // Nếu sau này có Product:
-    // public function products()
-    // {
-    //     return $this->hasMany(Product::class);
-    // }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

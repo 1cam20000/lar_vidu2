@@ -13,6 +13,7 @@
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="{{ route('admin.categories.index') }}">Categories</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('admin.products.index') }}">Products</a></li>
         {{-- Sau này thêm Products, Orders... --}}
       </ul>
     </div>
