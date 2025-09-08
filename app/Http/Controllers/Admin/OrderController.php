@@ -10,6 +10,7 @@ class OrderController extends Controller
 {
     public function index()
     {
+        // Lấy danh sách đơn hàng kèm user + items
         $orders = Order::with(['items.product', 'user'])->latest()->get();
         return view('admin.orders.index', compact('orders'));
     }
@@ -23,10 +24,18 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|string|max:50',
+            'status'          => 'nullable|string|max:50',
+            'shipping_status' => 'nullable|in:not_shipped,packaged,shipping,completed,cancelled',
         ]);
 
-        $order->update(['status' => $request->status]);
+        if ($request->filled('status')) {
+            $order->status = $request->status;
+        }
+        if ($request->filled('shipping_status')) {
+            $order->shipping_status = $request->shipping_status;
+        }
+
+        $order->save();
 
         return redirect()
             ->route('admin.orders.show', $order)

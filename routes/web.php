@@ -11,6 +11,8 @@ use App\Http\Controllers\User\ProductController   as UserProductController;
 use App\Http\Controllers\User\CategoryController  as UserCategoryController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\OrderController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\UserController;
 
 // Email verification
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -72,6 +74,8 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::resource('categories', AdminCategoryController::class);
         Route::resource('products',   AdminProductController::class);
         Route::resource('orders',     \App\Http\Controllers\Admin\OrderController::class);
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::resource('users', UserController::class);
     });
 
 /*
