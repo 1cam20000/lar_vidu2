@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title', 'Admin • MyShop')</title>
+  <title>@yield('title', 'Admin • ' . config('app.name'))</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   @stack('styles')
 </head>
-<body class="bg-light">
 <body class="bg-light d-flex flex-column min-vh-100">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand fw-semibold" href="{{ route('admin.dashboard') }}">MyShop Admin</a>
+  <a class="navbar-brand fw-semibold" href="{{ route('admin.dashboard') }}">{{ config('app.name') }} Admin</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -21,24 +20,31 @@
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
           <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-             href="{{ route('admin.dashboard') }}">Dashboard</a>
+            href="{{ route('admin.dashboard') }}">Dashboard</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
-             href="{{ route('admin.categories.index') }}">Categories</a>
+            href="{{ route('admin.categories.index') }}">Categories</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
-             href="{{ route('admin.products.index') }}">Products</a>
+            href="{{ route('admin.products.index') }}">Products</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.orders.index') }}">Orders</a>
+          <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+            href="{{ route('admin.orders.index') }}">Orders</a>
         </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.reports.index') }}">Reports</a>
-      </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
+          <a class="nav-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}"
+            href="{{ route('admin.reports.index') }}">Reports</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('admin.reports.charts') ? 'active' : '' }}"
+            href="{{ route('admin.reports.charts') }}">Charts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+            href="{{ route('admin.users.index') }}">Users</a>
         </li>
       </ul>
 
@@ -89,7 +95,7 @@
 
 <footer class="border-top py-3 bg-white mt-auto">
   <div class="container small text-muted">
-    © {{ date('Y') }} MyShop Admin • Váy công sở
+  © {{ date('Y') }} {{ config('app.name') }} Admin • Váy công sở
   </div>
 </footer>
 
