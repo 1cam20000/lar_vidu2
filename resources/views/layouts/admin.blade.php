@@ -8,6 +8,7 @@
   @stack('styles')
 </head>
 <body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
@@ -31,7 +32,13 @@
              href="{{ route('admin.products.index') }}">Products</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.orders.index') }}">Đơn hàng</a>
+            <a class="nav-link" href="{{ route('admin.orders.index') }}">Orders</a>
+        </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.reports.index') }}">Reports</a>
+      </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
         </li>
       </ul>
 
@@ -62,7 +69,7 @@
   </div>
 </nav>
 
-<main class="container py-4">
+<main class="container py-4 flex-grow-1">
   {{-- Flash messages --}}
   @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -80,7 +87,7 @@
   @yield('content')
 </main>
 
-<footer class="border-top py-3 bg-white">
+<footer class="border-top py-3 bg-white mt-auto">
   <div class="container small text-muted">
     © {{ date('Y') }} MyShop Admin • Váy công sở
   </div>

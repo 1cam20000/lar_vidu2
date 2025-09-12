@@ -13,6 +13,7 @@ class Order extends Model
         'phone',
         'total_price',
         'status',
+        'shipping_status',
         'payment_method',
         'momo_order_id',
         'momo_request_id'
