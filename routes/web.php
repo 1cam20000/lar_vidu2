@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController  as AdminProductController;
 use App\Http\Controllers\User\ProductController   as UserProductController;
 use App\Http\Controllers\User\CategoryController  as UserCategoryController;
+use App\Http\Controllers\User\CartController;
+
 
 // Email verification
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -91,3 +93,12 @@ Route::prefix('products')
     });
 
 Route::get('/categories', [UserCategoryController::class, 'index'])->name('user.categories.index');
+
+// Giỏ hàng (chỉ customer đã login & verified mới dùng)
+Route::middleware(['auth', 'verified'])->prefix('cart')->name('user.cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('add/{product}', [CartController::class, 'add'])->name('add');
+    Route::post('update/{item}', [CartController::class, 'update'])->name('update');
+    Route::delete('remove/{item}', [CartController::class, 'remove'])->name('remove');
+    Route::delete('clear', [CartController::class, 'clear'])->name('clear');
+});

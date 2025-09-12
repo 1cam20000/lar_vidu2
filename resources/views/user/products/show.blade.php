@@ -20,6 +20,17 @@
         @endforeach
       </ul>
     @endif
+    @if(Auth::check())
+      <form action="{{ route('user.cart.add',$product) }}" method="POST" class="mt-3">
+        @csrf
+        <div class="input-group" style="max-width:200px;">
+          <input type="number" name="quantity" class="form-control" value="1" min="1">
+          <button class="btn btn-success">Thêm vào giỏ</button>
+        </div>
+      </form>
+    @else
+      <p><a href="{{ route('login') }}">Đăng nhập</a> để mua hàng</p>
+    @endif
     <a href="{{ route('user.products.index') }}" class="btn btn-secondary">Quay lại</a>
   </div>
 </div>

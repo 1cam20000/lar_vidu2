@@ -15,6 +15,13 @@
           <h5 class="card-title">{{ $p->name }}</h5>
           <p class="card-text text-muted small">{{ number_format($p->price) }} VNĐ</p>
           <a href="{{ route('user.products.show',$p) }}" class="btn btn-sm btn-primary">Xem chi tiết</a>
+
+          @auth
+            <form action="{{ route('user.cart.add',$p) }}" method="POST" class="d-inline">
+              @csrf
+              <button class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+            </form>
+          @endauth
         </div>
       </div>
     </div>

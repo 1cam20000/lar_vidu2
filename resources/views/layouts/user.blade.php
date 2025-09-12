@@ -17,6 +17,9 @@
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{{ route('user.products.index') }}">Sản phẩm</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ route('user.categories.index') }}">Danh mục</a></li>
+        @auth
+          <li class="nav-item"><a class="nav-link" href="{{ route('user.cart.index') }}">Giỏ hàng</a></li>
+        @endauth
       </ul>
       <ul class="navbar-nav ms-auto">
         @auth
