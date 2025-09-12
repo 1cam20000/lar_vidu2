@@ -17,20 +17,28 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
+        $user = \App\Models\User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
             'role'     => 'customer',
         ]);
 
-        return redirect()->route('login')->with('success', 'Đăng ký thành công, mời bạn đăng nhập.');
+        // Gửi email xác thực
+        $user->sendEmailVerificationNotification();
+
+        // Tùy bạn có auto-login hay không; nếu có:
+        \Illuminate\Support\Facades\Auth::login($user);
+
+        // Điều hướng tới trang “hãy xác thực email”
+        return redirect()->route('verification.notice')
+            ->with('success', 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.');
     }
 
     public function showLoginForm()
