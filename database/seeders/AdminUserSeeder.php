@@ -16,6 +16,7 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
+                'email_verified_at' => now(), // Đánh dấu đã xác thực email
             ]
         );
     }

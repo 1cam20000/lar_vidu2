@@ -52,6 +52,7 @@
     </table>
 
     <h4>Tổng tiền: {{ number_format($cart->total()) }} VNĐ</h4>
+    <a href="{{ route('user.payment.index') }}" class="btn btn-success">💳 Thanh toán</a>
 
     <div class="d-flex gap-2">
       <form method="POST" action="{{ route('user.cart.clear') }}">
