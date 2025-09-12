@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title','MyShop - Váy công sở')</title>
+  <title>@yield('title', config('app.name') . ' - Váy công sở')</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="{{ route('welcome') }}">MyShop</a>
+    <a class="navbar-brand fw-bold" href="{{ route('welcome') }}">{{ config('app.name') }}</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarUser">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -52,9 +52,15 @@
   </div>
 </nav>
 
-<main class="container py-4">
+<main class="container py-4 flex-grow-1">
   @yield('content')
 </main>
+
+<footer class="border-top py-3 bg-white mt-auto">
+  <div class="container small text-muted">
+    © {{ date('Y') }} {{ config('app.name') }} • Váy công sở
+  </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

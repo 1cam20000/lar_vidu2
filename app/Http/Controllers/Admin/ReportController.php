@@ -42,4 +42,86 @@ class ReportController extends Controller
 
         return view('admin.reports.index', compact('dailyRevenue', 'monthlyRevenue', 'shippingStats'));
     }
+    public function charts()
+    {
+        $paid = ['đã thanh toán (MoMo)', 'đã đặt (COD)', 'hoàn tất'];
+
+        /* 1) Doanh thu theo danh mục */
+        $byCat = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->whereIn('orders.status', $paid)
+            ->selectRaw('COALESCE(categories.name, CONCAT("Danh mục #", products.category_id)) AS name')
+            ->selectRaw('SUM(order_items.price * order_items.quantity) AS revenue')
+            ->groupBy('name')
+            ->orderByDesc('revenue')
+            ->get();
+
+        $catLabels  = $byCat->pluck('name')->toArray();
+        $catRevenue = $byCat->pluck('revenue')->map(fn($v) => (float)$v)->toArray();
+
+        /* 2) Doanh thu theo ngày (30 ngày gần nhất) */
+        $startDay = now()->subDays(29)->startOfDay();
+        $byDate = \App\Models\Order::whereIn('status', $paid)
+            ->where('created_at', '>=', $startDay)
+            ->selectRaw('DATE(created_at) d, SUM(total_price) revenue')
+            ->groupBy('d')->orderBy('d')->get()->keyBy('d');
+
+        $revDateLabels = [];
+        $revDateData = [];
+        for ($i = 0; $i < 30; $i++) {
+            $d = $startDay->copy()->addDays($i)->toDateString();
+            $revDateLabels[] = $d;
+            $revDateData[] = (float)($byDate[$d]->revenue ?? 0);
+        }
+
+        /* 3) Doanh thu theo tháng (12 tháng gần nhất) */
+        $startMonth = now()->subMonths(11)->startOfMonth();
+        $byMonth = \App\Models\Order::whereIn('status', $paid)
+            ->where('created_at', '>=', $startMonth)
+            ->selectRaw("DATE_FORMAT(created_at,'%Y-%m') ym, SUM(total_price) revenue")
+            ->groupBy('ym')->orderBy('ym')->get()->keyBy('ym');
+
+        $revMonthLabels = [];
+        $revMonthData = [];
+        for ($i = 0; $i < 12; $i++) {
+            $m = $startMonth->copy()->addMonths($i);
+            $key = $m->format('Y-m');
+            $revMonthLabels[] = $m->format('m/Y');
+            $revMonthData[] = (float)($byMonth[$key]->revenue ?? 0);
+        }
+
+        /* 4) Doanh thu theo năm */
+        $byYear = \App\Models\Order::whereIn('status', $paid)
+            ->selectRaw('YEAR(created_at) y, SUM(total_price) revenue')
+            ->groupBy('y')->orderBy('y')->get();
+
+        $revYearLabels = $byYear->pluck('y')->toArray();
+        $revYearData = $byYear->pluck('revenue')->map(fn($v) => (float)$v)->toArray();
+
+        /* 5) Doanh thu theo phương thức thanh toán */
+        $paymentMethodLabels = ['MoMo', 'COD'];
+        $paymentMethodRevenue = [
+            (float)\App\Models\Order::where('payment_method', 'MoMo')
+                ->whereIn('status', ['đã thanh toán (MoMo)', 'hoàn tất'])
+                ->sum('total_price'),
+            (float)\App\Models\Order::where('payment_method', 'COD')
+                ->whereIn('status', ['đã đặt (COD)', 'hoàn tất'])
+                ->sum('total_price'),
+        ];
+
+        return view('admin.reports.charts', compact(
+            'catLabels',
+            'catRevenue',
+            'revDateLabels',
+            'revDateData',
+            'revMonthLabels',
+            'revMonthData',
+            'revYearLabels',
+            'revYearData',
+            'paymentMethodLabels',
+            'paymentMethodRevenue'
+        ));
+    }
 }

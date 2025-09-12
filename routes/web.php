@@ -1,34 +1,37 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-// Controllers
-use App\Http\Controllers\WelcomeController;
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController  as AdminProductController;
-use App\Http\Controllers\User\ProductController   as UserProductController;
-use App\Http\Controllers\User\CategoryController  as UserCategoryController;
-use App\Http\Controllers\User\CartController;
-use App\Http\Controllers\User\OrderController;
-use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\UserController;
-
-// Email verification
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
+// Controllers: Public & Auth
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\Auth\AuthController;
+
+// Controllers: Admin 
+use App\Http\Controllers\Admin\CategoryController  as AdminCategoryController;
+use App\Http\Controllers\Admin\ProductController   as AdminProductController;
+use App\Http\Controllers\Admin\OrderController     as AdminOrderController;
+use App\Http\Controllers\Admin\ReportController    as AdminReportController;
+use App\Http\Controllers\Admin\UserController      as AdminUserController;
+
+// Controllers: User 
+use App\Http\Controllers\User\ProductController    as UserProductController;
+use App\Http\Controllers\User\CategoryController   as UserCategoryController;
+use App\Http\Controllers\User\CartController       as UserCartController;
+use App\Http\Controllers\User\OrderController      as UserOrderController;
+
 /*
 |--------------------------------------------------------------------------
-| Public pages
-|--------------------------------------------------------------------------
+| Public pages (Lab00)
+|---------------------------------------------------------------------------
 */
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 /*
 |--------------------------------------------------------------------------
-| Auth (Register / Login / Logout)
+| Auth (Lab03)
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -38,19 +41,22 @@ Route::middleware('guest')->group(function () {
     Route::get('login',  [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login']);
 });
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::post('logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
 
 /*
 |--------------------------------------------------------------------------
 | Email Verification (Lab03+)
 |--------------------------------------------------------------------------
 */
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+Route::get('/email/verify', fn() => view('auth.verify-email'))
+    ->middleware('auth')
+    ->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+
     return $request->user()->role === 'admin'
         ? redirect()->route('admin.dashboard')->with('success', 'Email đã được xác thực.')
         : redirect()->route('welcome')->with('success', 'Email đã được xác thực.');
@@ -63,7 +69,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| Admin routes (chỉ admin & đã verify)
+| Admin routes (Lab06)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', 'admin'])
@@ -71,59 +77,49 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+
         Route::resource('categories', AdminCategoryController::class);
         Route::resource('products',   AdminProductController::class);
-        Route::resource('orders',     \App\Http\Controllers\Admin\OrderController::class);
-        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::resource('users', UserController::class);
+        Route::resource('orders',     AdminOrderController::class);
+        Route::resource('users',      AdminUserController::class);
+        Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/charts', [AdminReportController::class, 'charts'])->name('reports.charts');
     });
 
 /*
 |--------------------------------------------------------------------------
-| Customer-facing catalog
+| User routes (Lab02–Lab05)
 |--------------------------------------------------------------------------
 */
-Route::prefix('products')->name('user.products.')->group(function () {
-    Route::get('/',          [UserProductController::class, 'index'])->name('index');
-    Route::get('/{product}', [UserProductController::class, 'show'])->name('show');
-});
-Route::get('/categories', [UserCategoryController::class, 'index'])->name('user.categories.index');
+Route::middleware(['auth', 'verified'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
+        // Catalog
+        Route::prefix('products')->name('products.')->group(function () {
+            Route::get('/',          [UserProductController::class, 'index'])->name('index');
+            Route::get('/{product}', [UserProductController::class, 'show'])->name('show');
+        });
+        Route::get('/categories', [UserCategoryController::class, 'index'])->name('categories.index');
 
-/*
-|--------------------------------------------------------------------------
-| Cart (Lab04)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'verified'])->prefix('cart')->name('user.cart.')->group(function () {
-    Route::get('/',              [CartController::class, 'index'])->name('index');
-    Route::post('add/{product}', [CartController::class, 'add'])->name('add');
-    Route::post('update/{item}', [CartController::class, 'update'])->name('update');
-    Route::delete('remove/{item}', [CartController::class, 'remove'])->name('remove');
-    Route::delete('clear',       [CartController::class, 'clear'])->name('clear');
-});
+        // Cart (Lab04)
+        Route::prefix('cart')->name('cart.')->group(function () {
+            Route::get('/',                [UserCartController::class, 'index'])->name('index');
+            Route::post('add/{product}',   [UserCartController::class, 'add'])->name('add');
+            Route::post('update/{item}',   [UserCartController::class, 'update'])->name('update');
+            Route::delete('remove/{item}', [UserCartController::class, 'remove'])->name('remove');
+            Route::delete('clear',         [UserCartController::class, 'clear'])->name('clear');
+        });
 
-/*
-|--------------------------------------------------------------------------
-| Orders / Payment (Lab05: COD & MoMo)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Checkout
-    Route::get('/payment',  [OrderController::class, 'index'])->name('user.payment.index');
-    Route::post('/payment', [OrderController::class, 'store'])->name('user.payment.store');
+        // Orders & Payment (Lab05)
+        Route::get('/payment',  [UserOrderController::class, 'index'])->name('payment.index');
+        Route::post('/payment', [UserOrderController::class, 'store'])->name('payment.store');
 
-    // Order history & detail
-    Route::get('/orders',         [OrderController::class, 'orderHistory'])->name('user.orders.index');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('user.orders.show');
+        Route::get('/orders',            [UserOrderController::class, 'orderHistory'])->name('orders.index');
+        Route::get('/orders/{order}',    [UserOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/pay/momo', [UserOrderController::class, 'payAgain'])->name('orders.momo.pay');
 
-    // Pay again with MoMo
-    Route::get('/orders/{order}/pay/momo', [OrderController::class, 'payAgain'])->name('user.orders.momo.pay');
-});
-
-/*
-|--------------------------------------------------------------------------
-| MoMo callbacks (return & IPN)
-|--------------------------------------------------------------------------
-*/
-Route::get('/momo/callback', [OrderController::class, 'callback'])->name('user.payment.momo.callback');
-Route::post('/momo/ipn',    [OrderController::class, 'ipn'])->name('user.payment.momo.ipn');
+        // MoMo callbacks
+        Route::get('/momo/callback', [UserOrderController::class, 'callback'])->name('payment.momo.callback');
+        Route::post('/momo/ipn',     [UserOrderController::class, 'ipn'])->name('payment.momo.ipn');
+    });
